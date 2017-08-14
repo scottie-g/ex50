@@ -1,19 +1,18 @@
 from nose.tools import *
 from app import app
-from unittest import *
-
-app.config['TESTING'] = True
-web = app.test_client()
+import requests
+from tests.tools import assert_response
 
 def test_index():
-	rv = web.get('/', follow_redirects=True)
-	assert_equal(rv.status_code, 404)
+	resp = requests.get("http://localhost:5000/")
+	assert_response(resp, status="404")
 	
-	rv = web.get('/hello', follow_redirects=True)
-	assert_equal(rv.status_code, 200)
-	("Fill Out This Form", rv.data)
+	resp= requests.get("http://localhost:5000/hello")
+	assert_response(resp)
 	
-	#data = {'name': 'Scottie', 'greet': 'Howdy'}
-	#rv = web.post('/hello, follow_redirects=True, data=data)
-	#assert_in("Scottie", rv.data)
-	#assert_in("Howdy", rv.data)
+	resp = requests.get("http://localhost:5000/hello", method="POST")
+	assert_response(resp, contains="Nobody")
+	
+	data = {'name': 'Scott', 'greet': 'Howdy'}
+	resp = requests.get("http://localhost:5000/hello", method="POST", data=data)
+	assert_response(resp, contains="Scott")
